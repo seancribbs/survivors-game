@@ -2,11 +2,13 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::asset_loader::SpriteAssets;
+use crate::collision::Collider;
 use crate::movement::{MovementBundle, Velocity};
 use crate::player::Player;
 
 const GHOST_SPEED: f32 = 30.;
 const SPAWN_INTERVAL: f32 = 0.5;
+const GHOST_SIZE: Vec2 = Vec2::splat(16.);
 
 #[derive(Component, Debug)]
 pub struct Ghost;
@@ -56,6 +58,7 @@ fn spawn_ghost(
                 transform: Transform::from_translation(spawn_spot),
                 ..Default::default()
             },
+            Collider::new(GHOST_SIZE),
             MovementBundle {
                 velocity: Velocity::from_direction_speed(direction, GHOST_SPEED),
             },

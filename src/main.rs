@@ -2,7 +2,9 @@ use bevy::prelude::*;
 
 mod asset_loader;
 mod camera;
+mod collision;
 mod ghost;
+mod health;
 mod movement;
 mod player;
 
@@ -27,6 +29,8 @@ fn main() {
         .add_plugins(movement::MovementPlugin)
         .add_plugins(ghost::GhostPlugin)
         .add_plugins(player::PlayerPlugin)
+        .add_plugins(collision::CollisionPlugin)
+        .add_plugins(health::HealthPlugin)
         // .add_systems(PostUpdate, print_position)
         .run();
 }

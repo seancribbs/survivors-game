@@ -1,10 +1,14 @@
 use crate::{
     asset_loader::SpriteAssets,
+    collision::Collider,
+    health::Health,
     movement::{MovementBundle, Velocity},
 };
 use bevy::prelude::*;
 
 const PLAYER_SPEED: f32 = 50.;
+const PLAYER_SIZE: Vec2 = Vec2::splat(16.);
+const PLAYER_STARTING_HEALTH: u32 = 30;
 
 pub struct PlayerPlugin;
 
@@ -26,6 +30,8 @@ fn spawn_player(mut commands: Commands, sprite_assets: Res<SpriteAssets>) {
             transform: Transform::from_xyz(0., 0., 0.),
             ..Default::default()
         },
+        Health::new(PLAYER_STARTING_HEALTH),
+        Collider::new(PLAYER_SIZE),
         MovementBundle {
             velocity: Velocity::new(0., 0.),
         },
