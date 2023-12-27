@@ -12,8 +12,8 @@ impl Plugin for HealthPlugin {
 
 #[derive(Component, Debug)]
 pub struct Health {
-    amount: u32,
-    cooldown: Option<Timer>,
+    pub amount: u32,
+    pub cooldown: Option<Timer>,
 }
 
 impl Health {
