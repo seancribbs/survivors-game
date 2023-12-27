@@ -39,12 +39,16 @@ fn spawn_ghost(
     timer.0.tick(time.delta());
     if timer.0.just_finished() {
         let mut rng = rand::thread_rng();
-        let x = rng.gen_range(-1.0f32..1.0f32);
-        let y = rng.gen_range(-1.0f32..1.0f32);
-        let spawn_spot =
-            Vec3::new(x, y, 0.).try_normalize().unwrap_or(Vec3::X) * Vec3::new(410.0, 310.0, 0.);
-        let direction = Vec3::ZERO - spawn_spot;
+        let angle = rng.gen_range(0f32..(std::f32::consts::TAU));
+        let unit_vector = Vec2::from_angle(angle);
+        let vector_on_square = if unit_vector.x.abs() < unit_vector.y.abs() {
+            unit_vector / unit_vector.y.abs()
+        } else {
+            unit_vector / unit_vector.x.abs()
+        };
 
+        let spawn_spot = vector_on_square.extend(0.) * Vec3::new(410.0, 310.0, 0.);
+        let direction = Vec3::ZERO - spawn_spot;
         commands.spawn((
             Ghost,
             SpriteBundle {
