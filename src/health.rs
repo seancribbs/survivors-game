@@ -10,6 +10,8 @@ impl Plugin for HealthPlugin {
     }
 }
 
+const DAMAGE_COOLDOWN: f32 = 0.25;
+
 #[derive(Component, Debug)]
 pub struct Health {
     pub amount: u32,
@@ -40,7 +42,7 @@ fn take_damage(mut query: Query<(&mut Health, &Collider), With<Player>>, time: R
             None => {
                 health
                     .cooldown
-                    .replace(Timer::from_seconds(0.25, TimerMode::Once));
+                    .replace(Timer::from_seconds(DAMAGE_COOLDOWN, TimerMode::Once));
             }
             _ => {
                 return;

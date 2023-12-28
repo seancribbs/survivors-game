@@ -25,10 +25,6 @@ impl Velocity {
     pub fn change_direction_speed(&mut self, direction: Vec3, speed: f32) {
         self.value = direction.normalize_or_zero() * speed;
     }
-
-    pub fn accelerate(&mut self, acceleration: Vec3, dt: f32) {
-        self.value += acceleration * dt;
-    }
 }
 
 #[derive(Bundle, Debug, Default)]

@@ -9,7 +9,6 @@ pub struct CollisionPlugin;
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, detect_collisions.in_set(InGame::CollisionDetection));
-        // .add_systems(Update, knock_back_player);
     }
 }
 
@@ -53,29 +52,3 @@ fn detect_collisions(mut query: Query<(Entity, &Transform, &mut Collider)>) {
         collider.collisions = collisions.remove(&entity).unwrap_or_default();
     }
 }
-
-// fn knock_back_player(
-//     mut player: Query<(&Collider, &Transform, &mut Velocity), With<Player>>,
-//     transforms: Query<&Transform>,
-//     time: Res<Time>,
-// ) {
-//     let Ok((collider, transform, mut velocity)) = player.get_single_mut() else {
-//         return;
-//     };
-
-//     let mut knock_back = Vec3::ZERO;
-//     for collision in collider.collisions.iter() {
-//         let enemy_transform = transforms
-//             .get(*collision)
-//             .expect("Collided with entity that has no transform");
-//         let direction = (transform.translation - enemy_transform.translation)
-//             .try_normalize()
-//             .unwrap_or(Vec3::NEG_X);
-//         let acceleration = direction * 30.;
-//         knock_back += acceleration;
-//     }
-//     if knock_back.length_squared() > f32::EPSILON {
-//         info!("Knocking back player with acceleration {knock_back:?}");
-//     }
-//     velocity.accelerate(knock_back, time.elapsed_seconds());
-// }
