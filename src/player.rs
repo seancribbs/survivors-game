@@ -3,6 +3,7 @@ use crate::{
     collision::Collider,
     health::Health,
     movement::{MovementBundle, Velocity},
+    schedule::InGame,
 };
 use bevy::prelude::*;
 
@@ -15,7 +16,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_player)
-            .add_systems(Update, player_movement);
+            .add_systems(Update, player_movement.in_set(InGame::UserInput));
     }
 }
 

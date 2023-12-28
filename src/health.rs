@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 
-use crate::{collision::Collider, player::Player};
+use crate::{collision::Collider, player::Player, schedule::InGame};
 
 pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, take_damage);
+        app.add_systems(PostUpdate, take_damage.in_set(InGame::ProcessCombat));
     }
 }
 

@@ -5,6 +5,7 @@ use crate::asset_loader::SpriteAssets;
 use crate::collision::Collider;
 use crate::movement::{MovementBundle, Velocity};
 use crate::player::Player;
+use crate::schedule::InGame;
 
 const GHOST_SPEED: f32 = 30.;
 const SPAWN_INTERVAL: f32 = 0.5;
@@ -28,7 +29,7 @@ impl Plugin for GhostPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(SpawnTimer::default())
             .add_systems(Update, spawn_ghost)
-            .add_systems(Update, chase_player);
+            .add_systems(Update, chase_player.in_set(InGame::EntityUpdates));
     }
 }
 

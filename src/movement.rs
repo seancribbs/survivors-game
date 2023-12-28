@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::schedule::InGame;
+
 pub struct MovementPlugin;
 
 #[derive(Component, Debug, Default)]
@@ -36,7 +38,7 @@ pub struct MovementBundle {
 
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, update_position);
+        app.add_systems(Update, update_position.in_set(InGame::EntityUpdates));
     }
 }
 

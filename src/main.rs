@@ -7,6 +7,7 @@ mod ghost;
 mod health;
 mod movement;
 mod player;
+mod schedule;
 
 fn main() {
     App::new()
@@ -23,6 +24,7 @@ fn main() {
             })
         )
         // Our plugins
+        .add_plugins(schedule::SchedulePlugin)
         .add_plugins(camera::CameraPlugin)
         .add_plugins(asset_loader::AssetLoaderPlugin)
         .add_plugins(movement::MovementPlugin)
