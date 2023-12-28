@@ -1,12 +1,26 @@
 use bevy::prelude::*;
 
-use crate::{collision::Collider, player::Player, schedule::InGame};
+use crate::{
+    collision::Collider,
+    ghost::Ghost,
+    player::{Dagger, Player},
+    schedule::InGame,
+};
 
 pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, take_damage.in_set(InGame::ProcessCombat));
+        app.add_systems(
+            Update,
+            (
+                take_damage::<Player, Ghost>,
+                take_damage::<Ghost, Dagger>,
+                despawn_dead_entities,
+            )
+                .chain()
+                .in_set(InGame::ProcessCombat),
+        );
     }
 }
 
@@ -27,29 +41,39 @@ impl Health {
     }
 }
 
-fn take_damage(mut query: Query<(&mut Health, &Collider), With<Player>>, time: Res<Time>) {
-    let Ok((mut health, collider)) = query.get_single_mut() else {
-        return;
-    };
-    if let Some(cooldown) = health.cooldown.as_mut() {
-        cooldown.tick(time.delta());
-    }
-    if !collider.collisions.is_empty() {
-        match health.cooldown.as_mut() {
-            Some(cooldown) if cooldown.finished() => {
-                cooldown.reset();
-            }
-            None => {
-                health
-                    .cooldown
-                    .replace(Timer::from_seconds(DAMAGE_COOLDOWN, TimerMode::Once));
-            }
-            _ => {
-                return;
-            }
+fn take_damage<T: Component, E: Component>(
+    mut query: Query<(&mut Health, &Collider), With<T>>,
+    enemies: Query<&E, With<Collider>>,
+    time: Res<Time>,
+) {
+    for (mut health, collider) in query.iter_mut() {
+        if let Some(cooldown) = health.cooldown.as_mut() {
+            cooldown.tick(time.delta());
         }
-        // None, Some + timer is finished
-        health.amount = health.amount.saturating_sub(1);
-        info!("Player got hit, health is now {}", health.amount);
+        if collider.collisions.iter().any(|e| enemies.contains(*e)) {
+            match health.cooldown.as_mut() {
+                Some(cooldown) if cooldown.finished() => {
+                    cooldown.reset();
+                }
+                None => {
+                    health
+                        .cooldown
+                        .replace(Timer::from_seconds(DAMAGE_COOLDOWN, TimerMode::Once));
+                }
+                _ => {
+                    continue;
+                }
+            }
+            // None, Some + timer is finished
+            health.amount = health.amount.saturating_sub(1);
+        }
+    }
+}
+
+fn despawn_dead_entities(mut commands: Commands, query: Query<(Entity, &Health)>) {
+    for (entity, health) in query.iter() {
+        if health.amount == 0 {
+            commands.entity(entity).despawn_recursive();
+        }
     }
 }

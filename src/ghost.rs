@@ -3,6 +3,7 @@ use rand::Rng;
 
 use crate::asset_loader::SpriteAssets;
 use crate::collision::Collider;
+use crate::health::Health;
 use crate::movement::{MovementBundle, Velocity};
 use crate::player::Player;
 use crate::schedule::InGame;
@@ -60,6 +61,7 @@ fn spawn_ghost(
                 ..Default::default()
             },
             Collider::new(GHOST_SIZE),
+            Health::new(1),
             MovementBundle {
                 velocity: Velocity::from_direction_speed(direction, GHOST_SPEED),
             },

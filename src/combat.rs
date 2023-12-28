@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{collision::Collider, player::Player, schedule::InGame};
+use crate::{collision::Collider, ghost::Ghost, player::Player, schedule::InGame};
 
 pub struct CombatPlugin;
 
@@ -9,7 +9,7 @@ impl Plugin for CombatPlugin {
         app.add_systems(Update, apply_knockback.in_set(InGame::EntityUpdates))
             .add_systems(
                 Update,
-                knockback_collisions::<Player>.in_set(InGame::ProcessCombat),
+                knockback_collisions::<Player, Ghost>.in_set(InGame::ProcessCombat),
             );
     }
 }
@@ -38,15 +38,15 @@ fn apply_knockback(
     }
 }
 
-fn knockback_collisions<T: Component>(
+fn knockback_collisions<T: Component, C: Component>(
     mut commands: Commands,
     collidee: Query<(Entity, &Collider, &Transform, &T), Without<KnockBack>>,
-    collided: Query<&Transform, With<Collider>>,
+    collided: Query<(&Transform, &C), With<Collider>>,
 ) {
     for (entity, collider, transform, _) in collidee.iter() {
         let mut direction: Vec3 = Vec3::ZERO;
         for collided_entity in collider.collisions.iter() {
-            if let Ok(collided_transform) = collided.get(*collided_entity) {
+            if let Ok((collided_transform, _)) = collided.get(*collided_entity) {
                 direction += transform.translation - collided_transform.translation;
             }
         }

@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct SpriteAssets {
     pub ghost: Handle<Image>,
     pub knight: Handle<Image>,
+    pub dagger: Handle<Image>,
 }
 
 pub struct AssetLoaderPlugin;
@@ -19,5 +20,6 @@ fn load_assets(mut sprite_assets: ResMut<SpriteAssets>, asset_server: Res<AssetS
     *sprite_assets = SpriteAssets {
         ghost: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0121.png"),
         knight: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0097.png"),
+        dagger: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0103.png"),
     };
 }
