@@ -12,7 +12,6 @@ fn main() {
     App::new()
         // Bevy built-ins
         .insert_resource(ClearColor(Color::rgb(0.1, 0., 0.15)))
-        .insert_resource(AmbientLight { color: Color::rgb(1., 1., 1.), brightness: 0.95 })
         .add_plugins(DefaultPlugins.set(
             WindowPlugin {
                 primary_window: Some(Window {
