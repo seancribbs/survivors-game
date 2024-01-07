@@ -46,8 +46,14 @@ fn add_outer_walls(mut commands: Commands, sprites: Res<SpriteAssets>, map: Res<
                 &sprites.wall.hwall_face
             }
             .clone();
+
             commands.spawn((
                 Wall,
+                if top_of_wall {
+                    Collider::with_size_and_offset(Vec2::new(16., 12.), Vec2::new(0., -4.))
+                } else {
+                    Collider::with_size_and_offset(Vec2::new(16., 8.), Vec2::new(0., 4.))
+                },
                 SpriteBundle {
                     texture,
                     transform: Transform::from_translation(grid_to_world(IVec2::new(x, y))),
