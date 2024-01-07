@@ -6,6 +6,7 @@ mod collision;
 mod combat;
 mod ghost;
 mod health;
+mod map;
 mod movement;
 mod player;
 mod schedule;
@@ -26,6 +27,7 @@ fn main() {
         )
         // Our plugins
         .add_plugins(schedule::SchedulePlugin)
+        .add_plugins(map::MapPlugin)
         .add_plugins(camera::CameraPlugin)
         .add_plugins(asset_loader::AssetLoaderPlugin)
         .add_plugins(movement::MovementPlugin)
