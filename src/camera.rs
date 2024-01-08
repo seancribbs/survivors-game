@@ -1,4 +1,3 @@
-#![allow(clippy::type_complexity)]
 use bevy::prelude::*;
 
 use crate::{map::grid_to_world, map::Map, player::Player, schedule::InGame};

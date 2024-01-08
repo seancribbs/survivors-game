@@ -5,6 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lints.clippy]
+type_complexity = "allow"
+
 [dependencies]
 bevy = { version = "0.12.1", default-features = false, features = [
     "animation",
