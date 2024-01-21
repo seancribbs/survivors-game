@@ -19,6 +19,12 @@ pub struct Collider {
     pub collisions: Vec<Entity>,
 }
 
+impl Default for Collider {
+    fn default() -> Self {
+        Self::new(Vec2::ZERO)
+    }
+}
+
 impl Collider {
     pub fn new(size: Vec2) -> Self {
         Self::with_size_and_offset(size, Vec2::ZERO)

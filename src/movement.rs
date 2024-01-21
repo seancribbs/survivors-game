@@ -57,16 +57,23 @@ fn keep_inside_walls<T: Component>(
     mut query: Query<(&mut Transform, &Collider), (With<T>, Without<Wall>)>,
     walls: Query<(&Transform, &Collider), With<Wall>>,
 ) {
+    // Note: This would be easier and more consistent if we use integer pixel dimensions and not FP
     for (mut transform, collider) in query.iter_mut() {
         let object_rect = collider.to_rect_at(&transform);
         for collision in collider.collisions.iter() {
             if let Ok((wall_transform, wall_collider)) = walls.get(*collision) {
                 let wall_rect = wall_collider.to_rect_at(wall_transform);
                 let overlap = object_rect.intersect(wall_rect);
-                let push_away = Vec2::new(overlap.width(), overlap.height())
-                    * (object_rect.center() - wall_rect.center()).signum();
+
+                // We assume that the overlapping dimensions will be largest
+                // in the direction that we not colliding in.
+                let base_push = if overlap.width() < overlap.height() {
+                    Vec2::new(overlap.width(), 0.)
+                } else {
+                    Vec2::new(0., overlap.height())
+                };
+                let push_away = base_push * (object_rect.center() - wall_rect.center()).signum();
                 transform.translation += push_away.extend(0.);
-                info!("Pushed away by {push_away:?}");
             }
         }
     }
