@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    collision::Collider,
+    collision::{CollisionDamage, CollisionEvent},
     ghost::Ghost,
     player::{Dagger, Player},
     schedule::InGame,
@@ -20,16 +20,27 @@ impl Plugin for HealthPlugin {
             )
                 .chain()
                 .in_set(InGame::ProcessCombat),
-        );
+        )
+        .add_systems(Update, tick_damage_cooldown.in_set(InGame::EntityUpdates));
     }
 }
-
-const DAMAGE_COOLDOWN: f32 = 0.25;
 
 #[derive(Component, Debug)]
 pub struct Health {
     pub amount: u32,
-    pub cooldown: Option<Timer>,
+    pub cooldown: Option<f32>,
+}
+
+#[derive(Component, Debug)]
+pub struct DamageCooldown {
+    pub cooldown: Timer,
+}
+
+impl DamageCooldown {
+    pub fn new(cooldown: f32) -> Self {
+        let cooldown = Timer::from_seconds(cooldown, TimerMode::Once);
+        Self { cooldown }
+    }
 }
 
 impl Health {
@@ -39,33 +50,50 @@ impl Health {
             cooldown: None,
         }
     }
+
+    pub fn with_damage_cooldown(amount: u32, cooldown: f32) -> Self {
+        Self {
+            amount,
+            cooldown: Some(cooldown),
+        }
+    }
 }
 
 fn take_damage<T: Component, E: Component>(
-    mut query: Query<(&mut Health, &Collider), With<T>>,
-    enemies: Query<&E, With<Collider>>,
+    mut commands: Commands,
+    mut events: EventReader<CollisionEvent>,
+    mut receiver: Query<&mut Health, (With<T>, Without<DamageCooldown>)>,
+    damager: Query<&CollisionDamage, With<E>>,
+) {
+    for collision in events.read() {
+        let Ok(mut health) = receiver.get_mut(collision.entity) else {
+            continue;
+        };
+
+        let Ok(damage) = damager.get(collision.collided_with) else {
+            continue;
+        };
+
+        health.amount = health.amount.saturating_sub(damage.amount);
+
+        if let Some(duration) = health.cooldown.as_ref() {
+            commands
+                .entity(collision.entity)
+                .insert(DamageCooldown::new(*duration));
+        }
+    }
+}
+
+fn tick_damage_cooldown(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut DamageCooldown)>,
     time: Res<Time>,
 ) {
-    for (mut health, collider) in query.iter_mut() {
-        if let Some(cooldown) = health.cooldown.as_mut() {
-            cooldown.tick(time.delta());
-        }
-        if collider.collisions.iter().any(|e| enemies.contains(*e)) {
-            match health.cooldown.as_mut() {
-                Some(cooldown) if cooldown.finished() => {
-                    cooldown.reset();
-                }
-                None => {
-                    health
-                        .cooldown
-                        .replace(Timer::from_seconds(DAMAGE_COOLDOWN, TimerMode::Once));
-                }
-                _ => {
-                    continue;
-                }
-            }
-            // None, Some + timer is finished
-            health.amount = health.amount.saturating_sub(1);
+    for (entity, mut cooldown) in query.iter_mut() {
+        cooldown.cooldown.tick(time.delta());
+
+        if cooldown.cooldown.just_finished() {
+            commands.entity(entity).remove::<DamageCooldown>();
         }
     }
 }

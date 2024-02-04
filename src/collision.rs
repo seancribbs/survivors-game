@@ -2,13 +2,27 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::schedule::InGame;
+use crate::{
+    ghost::Ghost,
+    player::{Dagger, Player},
+    schedule::InGame,
+};
 
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, detect_collisions.in_set(InGame::CollisionDetection));
+        app.add_systems(Update, detect_collisions.in_set(InGame::CollisionDetection))
+            .add_systems(
+                Update,
+                (
+                    handle_collisions::<Player>,
+                    handle_collisions::<Ghost>,
+                    handle_collisions::<Dagger>,
+                )
+                    .in_set(InGame::ProcessCombat),
+            )
+            .add_event::<CollisionEvent>();
     }
 }
 
@@ -22,6 +36,32 @@ pub struct Collider {
 impl Default for Collider {
     fn default() -> Self {
         Self::new(Vec2::ZERO)
+    }
+}
+
+#[derive(Component, Debug)]
+pub struct CollisionDamage {
+    pub amount: u32,
+}
+
+impl CollisionDamage {
+    pub fn new(amount: u32) -> Self {
+        Self { amount }
+    }
+}
+
+#[derive(Debug, Event)]
+pub struct CollisionEvent {
+    pub entity: Entity,
+    pub collided_with: Entity,
+}
+
+impl CollisionEvent {
+    pub fn new(entity: Entity, collided_with: Entity) -> Self {
+        Self {
+            entity,
+            collided_with,
+        }
     }
 }
 
@@ -65,5 +105,16 @@ fn detect_collisions(mut query: Query<(Entity, &Transform, &mut Collider)>) {
     // Record
     for (entity, _, mut collider) in query.iter_mut() {
         collider.collisions = collisions.remove(&entity).unwrap_or_default();
+    }
+}
+
+fn handle_collisions<T: Component>(
+    mut events: EventWriter<CollisionEvent>,
+    query: Query<(Entity, &Collider), With<T>>,
+) {
+    for (entity, collider) in query.iter() {
+        for collided_with in collider.collisions.iter() {
+            events.send(CollisionEvent::new(entity, *collided_with));
+        }
     }
 }

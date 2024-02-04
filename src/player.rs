@@ -1,6 +1,6 @@
 use crate::{
     asset_loader::SpriteAssets,
-    collision::Collider,
+    collision::{Collider, CollisionDamage},
     health::Health,
     movement::{MovementBundle, Velocity},
     schedule::InGame,
@@ -11,8 +11,11 @@ const PLAYER_SPEED: f32 = 50.;
 const PLAYER_SIZE: Vec2 = Vec2::splat(16.);
 const PLAYER_STARTING_HEALTH: u32 = 30;
 const PLAYER_ATTACK_COOLDOWN: f32 = 1.0;
+const PLAYER_DAMAGE_COOLDOWN: f32 = 0.25;
 const DAGGER_SPEED: f32 = 25.0;
 const DAGGER_SPAWN_DISTANCE: f32 = 16.0;
+const DAGGER_DAMAGE: u32 = 5;
+const DAGGER_HEALTH: u32 = 1;
 
 pub struct PlayerPlugin;
 
@@ -41,7 +44,7 @@ fn spawn_player(mut commands: Commands, sprite_assets: Res<SpriteAssets>) {
             transform: Transform::from_xyz(0., 0., 0.),
             ..Default::default()
         },
-        Health::new(PLAYER_STARTING_HEALTH),
+        Health::with_damage_cooldown(PLAYER_STARTING_HEALTH, PLAYER_DAMAGE_COOLDOWN),
         Collider::new(PLAYER_SIZE),
         Weapon(Timer::from_seconds(
             PLAYER_ATTACK_COOLDOWN,
@@ -72,6 +75,8 @@ fn player_movement(mut query: Query<&mut Velocity, With<Player>>, input: Res<Inp
             _ => {}
         }
     }
+    // NOTE: If the player has died/been despawned from losing all its health, this will panic.
+    // We need to solve this by changing game states or guarding this access.
     let mut velocity = query.single_mut();
     velocity.change_direction_speed(direction, PLAYER_SPEED);
 }
@@ -101,6 +106,8 @@ fn throw_weapon(
                     ..Default::default()
                 },
                 Collider::new(Vec2::new(8., 13.)),
+                Health::new(DAGGER_HEALTH),
+                CollisionDamage::new(DAGGER_DAMAGE),
                 MovementBundle {
                     velocity: Velocity::from_direction_speed(direction, DAGGER_SPEED),
                 },
