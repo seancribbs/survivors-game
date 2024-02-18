@@ -1,39 +1,58 @@
 use bevy::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
 
-use crate::{map::grid_to_world, map::Map, player::Player, schedule::InGame};
+use crate::{player::Player, schedule::InGame};
 
 const CAMERA_SCALE: f32 = 0.75;
 
 pub struct CameraPlugin;
 
-impl Plugin for CameraPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_camera)
-            .add_systems(Update, camera_follows_player.in_set(InGame::EntityUpdates));
-    }
+#[derive(Bundle, Default, LdtkEntity)]
+pub struct EntityCameraBundle {
+    camera: Camera2dBundle,
 }
 
-fn spawn_camera(mut commands: Commands) {
-    let mut bundle = Camera2dBundle::default();
-    bundle.projection.scale = CAMERA_SCALE;
-    commands.spawn(bundle);
+impl Plugin for CameraPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_ldtk_entity::<EntityCameraBundle>("camera");
+        // .add_systems(Update, camera_follows_player.in_set(InGame::EntityUpdates));
+    }
 }
 
 fn camera_follows_player(
     player: Query<&Transform, With<Player>>,
     mut camera: Query<(&mut Transform, &OrthographicProjection), (With<Camera>, Without<Player>)>,
-    map: Res<Map>,
+    level_query: Query<(&Transform, &LevelIid), (Without<OrthographicProjection>, Without<Player>)>,
+    level_selection: Res<LevelSelection>,
+    ldtk_projects: Query<&Handle<LdtkProject>>,
+    ldtk_project_assets: Res<Assets<LdtkProject>>,
 ) {
+    let Ok((mut camera_transform, projection)) = camera.get_single_mut() else {
+        return;
+    };
+
     if let Ok(player_transform) = player.get_single() {
-        let (mut camera_transform, projection) = camera.single_mut();
+        for (level_transform, level_iid) in &level_query {
+            let ldtk_project = ldtk_project_assets
+                .get(ldtk_projects.single())
+                .expect("Project should be loaded if level has spawned");
 
-        let bottom_left = grid_to_world(-(map.dimensions / 2));
-        let top_right = grid_to_world(map.dimensions / 2);
+            let level = ldtk_project
+                .get_raw_level_by_iid(&level_iid.to_string())
+                .expect("Spawned level should exist in LDtk project");
 
-        let min_camera_position = bottom_left - projection.area.min.extend(0.);
-        let max_camera_position = top_right - projection.area.max.extend(0.);
-        camera_transform.translation = player_transform
-            .translation
-            .clamp(min_camera_position, max_camera_position);
+            if level_selection.is_match(&LevelIndices::default(), level) {
+                let top_right = (IVec2::new(level.px_wid, level.px_hei).as_vec2() / 2.).extend(0.);
+                let bottom_left = -top_right;
+
+                let min_camera_position =
+                    bottom_left - projection.area.min.extend(0.) + level_transform.translation;
+                let max_camera_position =
+                    top_right - projection.area.max.extend(0.) + level_transform.translation;
+                camera_transform.translation = player_transform
+                    .translation
+                    .clamp(min_camera_position, max_camera_position);
+            }
+        }
     }
 }

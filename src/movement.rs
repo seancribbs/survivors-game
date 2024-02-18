@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{collision::Collider, ghost::Ghost, map::Wall, player::Player, schedule::InGame};
+use crate::{collision::Collider, ghost::Ghost, levels::Wall, player::Player, schedule::InGame};
 
 pub struct MovementPlugin;
 

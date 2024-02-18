@@ -53,7 +53,7 @@ fn spawn_ghost(
             unit_vector / unit_vector.x.abs()
         };
 
-        let spawn_spot = vector_on_square.extend(0.) * Vec3::new(410.0, 310.0, 0.);
+        let spawn_spot = vector_on_square.extend(100.) * Vec3::new(410.0, 310.0, 1.);
         let direction = Vec3::ZERO - spawn_spot;
         commands.spawn((
             Ghost,
@@ -76,7 +76,9 @@ fn chase_player(
     mut ghosts: Query<(&mut Velocity, &Transform), With<Ghost>>,
     player: Query<&Transform, With<Player>>,
 ) {
-    let player_transform = player.single();
+    let Ok(player_transform) = player.get_single() else {
+        return;
+    };
     for (mut velocity, transform) in ghosts.iter_mut() {
         let direction = player_transform.translation - transform.translation;
         velocity.change_direction_speed(direction, GHOST_SPEED);

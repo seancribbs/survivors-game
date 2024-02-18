@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
 
 mod asset_loader;
 mod camera;
@@ -6,7 +7,7 @@ mod collision;
 mod combat;
 mod ghost;
 mod health;
-mod map;
+mod levels;
 mod movement;
 mod player;
 mod schedule;
@@ -23,13 +24,14 @@ fn main() {
                     ..Default::default()
                 }),
                 ..Default::default()
-            })
+            }).set(ImagePlugin::default_nearest())
         )
         // Our plugins
+        .add_plugins(LdtkPlugin)
         .add_plugins(schedule::SchedulePlugin)
-        .add_plugins(map::MapPlugin)
         .add_plugins(camera::CameraPlugin)
         .add_plugins(asset_loader::AssetLoaderPlugin)
+        .add_plugins(levels::LevelsPlugin)
         .add_plugins(movement::MovementPlugin)
         .add_plugins(ghost::GhostPlugin)
         .add_plugins(player::PlayerPlugin)
