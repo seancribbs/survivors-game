@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use bevy::sprite::MaterialMesh2dBundle;
 
 use crate::{
     ghost::Ghost,
@@ -13,6 +14,7 @@ pub struct CollisionPlugin;
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, detect_collisions.in_set(InGame::CollisionDetection))
+            .add_systems(Update, setup_collision_gizmos)
             .add_systems(
                 Update,
                 (
@@ -116,5 +118,34 @@ fn handle_collisions<T: Component>(
         for collided_with in collider.collisions.iter() {
             events.send(CollisionEvent::new(entity, *collided_with));
         }
+    }
+}
+
+fn setup_collision_gizmos(
+    mut commands: Commands,
+    query: Query<(Entity, &Collider), Added<Collider>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    if !cfg!(feature = "gizmos") {
+        return;
+    }
+    let color = Color::LIME_GREEN.with_a(0.50);
+    let center_color = Color::CYAN;
+    for (entity, collider) in query.iter() {
+        commands.entity(entity).with_children(|children| {
+            children.spawn(MaterialMesh2dBundle {
+                mesh: meshes.add(shape::Quad::new(collider.size).into()).into(),
+                material: materials.add(ColorMaterial::from(color)),
+                transform: Transform::from_translation(collider.offset.extend(100.0)),
+                ..default()
+            });
+            children.spawn(MaterialMesh2dBundle {
+                mesh: meshes.add(shape::Quad::new(Vec2::ONE).into()).into(),
+                material: materials.add(ColorMaterial::from(center_color)),
+                transform: Transform::from_translation(collider.offset.extend(101.0)),
+                ..default()
+            });
+        });
     }
 }
