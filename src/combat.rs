@@ -1,6 +1,8 @@
-use bevy::prelude::*;
+use std::ops::AddAssign;
 
-use crate::{collision::Collider, ghost::Ghost, player::Player, schedule::InGame};
+use bevy::{prelude::*, utils::HashMap};
+
+use crate::{collision::CollisionEvent, ghost::Ghost, player::Player, schedule::InGame};
 
 pub struct CombatPlugin;
 
@@ -40,16 +42,28 @@ fn apply_knockback(
 
 fn knockback_collisions<T: Component, C: Component>(
     mut commands: Commands,
-    collidee: Query<(Entity, &Collider, &Transform, &T), Without<KnockBack>>,
-    collided: Query<(&Transform, &C), With<Collider>>,
+    mut events: EventReader<CollisionEvent>,
+    receivers: Query<&Transform, (With<T>, Without<KnockBack>)>,
+    pushers: Query<&Transform, With<C>>,
 ) {
-    for (entity, collider, transform, _) in collidee.iter() {
-        let mut direction: Vec3 = Vec3::ZERO;
-        for collided_entity in collider.collisions.iter() {
-            if let Ok((collided_transform, _)) = collided.get(*collided_entity) {
-                direction += transform.translation - collided_transform.translation;
-            }
-        }
+    let mut knockbacks: HashMap<Entity, Vec3> = HashMap::new();
+    for event in events.read() {
+        let Ok(receiver_transform) = receivers.get(event.entity) else {
+            continue;
+        };
+
+        let Ok(pusher_transform) = pushers.get(event.collided_with) else {
+            continue;
+        };
+
+        let push_direction = receiver_transform.translation - pusher_transform.translation;
+        knockbacks
+            .entry(event.entity)
+            .and_modify(|direction| direction.add_assign(push_direction))
+            .or_insert(push_direction);
+    }
+
+    for (entity, direction) in knockbacks.into_iter() {
         commands.entity(entity).insert(KnockBack {
             displacement: direction.normalize_or_zero() * KNOCK_BACK_DISTANCE,
             duration: Timer::from_seconds(KNOCK_BACK_DURATION, TimerMode::Once),
