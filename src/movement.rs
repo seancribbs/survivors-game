@@ -76,7 +76,6 @@ fn keep_inside_walls<T: Component>(
         let object_rect = object_collider.to_rect_at(&object_transform);
         let wall_rect = wall_collider.to_rect_at(wall_transform);
         let overlap = object_rect.intersect(wall_rect);
-        info!("object: {object_rect:?} wall: {wall_rect:?} overlap: {overlap:?}");
 
         // We assume that the overlapping dimensions will be largest
         // in the direction that we not colliding in.
