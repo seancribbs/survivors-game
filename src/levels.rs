@@ -5,9 +5,6 @@ use bevy_ecs_ldtk::prelude::*;
 
 use crate::collision::Collider;
 
-pub const TILE_SIZE: i32 = 16;
-// pub const TILE_DIMENSIONS: IVec2 = IVec2::splat(TILE_SIZE);
-
 pub struct LevelsPlugin;
 
 #[derive(Component, Debug, Clone, Copy, Default)]
@@ -21,12 +18,22 @@ pub struct WallBundle {
     pub wall: WallTile,
 }
 
+#[derive(Resource, Default, Debug)]
+pub struct SpawnLocations(HashMap<String, HashSet<GridCoords>>);
+
+impl SpawnLocations {
+    pub fn for_level(&self, iid: &str) -> Option<&HashSet<GridCoords>> {
+        self.0.get(iid)
+    }
+}
+
 impl Plugin for LevelsPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LevelSelection::index(0))
+            .init_resource::<SpawnLocations>()
             .register_ldtk_int_cell::<WallBundle>(1)
             .add_systems(Startup, load_levels)
-            .add_systems(Update, add_wall_colliders);
+            .add_systems(Update, (add_wall_colliders, preload_spawn_spots));
     }
 }
 
@@ -35,6 +42,37 @@ fn load_levels(mut commands: Commands, asset_server: Res<AssetServer>) {
         ldtk_handle: asset_server.load("levels/basic.ldtk"),
         ..Default::default()
     });
+}
+
+fn preload_spawn_spots(
+    mut spawn_locations: ResMut<SpawnLocations>,
+    ground_query: Query<(&GridCoords, &Parent, &TileMetadata), Added<TileMetadata>>,
+    parent_query: Query<&Parent, Without<TileMetadata>>,
+    level_query: Query<(Entity, &LevelIid)>,
+) {
+    if ground_query.is_empty() {
+        return;
+    }
+    let mut level_to_spawn_locations: HashMap<Entity, HashSet<GridCoords>> = HashMap::new();
+    for (grid_coords, parent, metadata) in ground_query.iter() {
+        if metadata.data == "Ground" {
+            if let Ok(grandparent) = parent_query.get(parent.get()) {
+                level_to_spawn_locations
+                    .entry(grandparent.get())
+                    .or_default()
+                    .insert(*grid_coords);
+            }
+        }
+    }
+    spawn_locations.0 = level_query
+        .iter()
+        .map(|(entity, iid)| {
+            (
+                iid.get().clone(),
+                level_to_spawn_locations.remove(&entity).unwrap_or_default(),
+            )
+        })
+        .collect();
 }
 
 fn add_wall_colliders(

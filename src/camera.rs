@@ -1,22 +1,20 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
 
 use crate::{player::Player, schedule::InGame};
 
-const CAMERA_SCALE: f32 = 0.75;
+// const CAMERA_SCALE: f32 = 0.75;
 
 pub struct CameraPlugin;
 
-#[derive(Bundle, Default, LdtkEntity)]
-pub struct EntityCameraBundle {
-    camera: Camera2dBundle,
-}
-
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.register_ldtk_entity::<EntityCameraBundle>("camera")
+        app.add_systems(Startup, spawn_camera)
             .add_systems(Update, camera_follows_player.in_set(InGame::EntityUpdates));
     }
+}
+
+fn spawn_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
 }
 
 fn camera_follows_player(

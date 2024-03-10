@@ -38,7 +38,6 @@ fn main() {
         .add_plugins(collision::CollisionPlugin)
         .add_plugins(health::HealthPlugin)
         .add_plugins(combat::CombatPlugin)
-        // .add_systems(PostUpdate, print_position)
         .run();
 }
 

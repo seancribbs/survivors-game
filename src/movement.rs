@@ -22,12 +22,6 @@ impl Velocity {
         }
     }
 
-    pub fn new(x: f32, y: f32) -> Self {
-        Self {
-            value: Vec3::new(x, y, 0.),
-        }
-    }
-
     pub fn change_direction_speed(&mut self, direction: Vec3, speed: f32) {
         self.value = direction.normalize_or_zero() * speed;
     }
@@ -45,7 +39,7 @@ impl Plugin for MovementPlugin {
             (
                 update_position,
                 keep_inside_walls::<Player>,
-                // keep_inside_walls::<Ghost>,
+                keep_inside_walls::<Ghost>,
             )
                 .chain()
                 .in_set(InGame::EntityUpdates),
