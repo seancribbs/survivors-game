@@ -2,20 +2,7 @@ use bevy::prelude::*;
 
 #[derive(Resource, Debug, Default)]
 pub struct SpriteAssets {
-    pub ghost: Handle<Image>,
-    pub knight: Handle<Image>,
-    pub dagger: Handle<Image>,
-    pub wall: WallSprites,
-}
-
-#[derive(Debug, Default)]
-pub struct WallSprites {
-    pub hwall_top_left: Handle<Image>,
-    pub hwall_top_right: Handle<Image>,
-    pub hwall_top_mid: Handle<Image>,
-    pub hwall_face: Handle<Image>,
-    pub vwall_left: Handle<Image>,
-    pub vwall_right: Handle<Image>,
+    pub tiles: Handle<TextureAtlas>,
 }
 
 pub struct AssetLoaderPlugin;
@@ -27,18 +14,23 @@ impl Plugin for AssetLoaderPlugin {
     }
 }
 
-fn load_assets(mut sprite_assets: ResMut<SpriteAssets>, asset_server: Res<AssetServer>) {
+fn load_assets(
+    mut sprite_assets: ResMut<SpriteAssets>,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    let tilemap = asset_server.load("kenney_tiny-dungeon/Tilemap/tilemap.png");
+    let atlas = TextureAtlas::from_grid(
+        tilemap,
+        Vec2::splat(16.0),
+        12,
+        11,
+        Some(Vec2::ONE),
+        Some(Vec2::ONE),
+    );
+    let atlas_handle = texture_atlases.add(atlas);
+
     *sprite_assets = SpriteAssets {
-        ghost: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0121.png"),
-        knight: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0097.png"),
-        dagger: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0103.png"),
-        wall: WallSprites {
-            hwall_top_left: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0001.png"),
-            hwall_top_right: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0003.png"),
-            hwall_top_mid: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0006.png"),
-            hwall_face: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0040.png"),
-            vwall_right: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0015.png"),
-            vwall_left: asset_server.load("kenney_tiny-dungeon/Tiles/tile_0013.png"),
-        },
+        tiles: atlas_handle,
     };
 }

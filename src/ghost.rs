@@ -23,7 +23,7 @@ pub struct Ghost;
 #[derive(Bundle)]
 pub struct GhostBundle {
     ghost: Ghost,
-    sprite: SpriteBundle,
+    sprite: SpriteSheetBundle,
     collider: Collider,
     damage: CollisionDamage,
     health: Health,
@@ -37,8 +37,9 @@ impl GhostBundle {
             collider: Collider::new(GHOST_SIZE),
             damage: CollisionDamage::new(GHOST_DAMAGE),
             health: Health::new(GHOST_HEALTH),
-            sprite: SpriteBundle {
-                texture: sprites.ghost.clone(),
+            sprite: SpriteSheetBundle {
+                texture_atlas: sprites.tiles.clone(),
+                sprite: TextureAtlasSprite::new(121),
                 transform: Transform::from_translation(spawn_at),
                 ..Default::default()
             },

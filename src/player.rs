@@ -5,7 +5,7 @@ use crate::{
     movement::{MovementBundle, Velocity},
     schedule::InGame,
 };
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Anchor};
 use bevy_ecs_ldtk::prelude::*;
 
 const PLAYER_SPEED: f32 = 50.;
@@ -95,6 +95,29 @@ fn player_movement(
     velocity.change_direction_speed(direction, PLAYER_SPEED);
 }
 
+#[derive(Bundle)]
+pub struct DaggerBundle {
+    dagger: Dagger,
+    spritesheet: SpriteSheetBundle,
+    collider: Collider,
+    health: Health,
+    collision_damage: CollisionDamage,
+    movement: MovementBundle,
+}
+
+impl Default for DaggerBundle {
+    fn default() -> Self {
+        Self {
+            dagger: Dagger,
+            spritesheet: Default::default(),
+            collider: Collider::new(Vec2::new(8., 13.)),
+            health: Health::new(DAGGER_HEALTH),
+            collision_damage: CollisionDamage::new(DAGGER_DAMAGE),
+            movement: Default::default(),
+        }
+    }
+}
+
 fn throw_weapon(
     mut query: Query<(&mut Weapon, &Transform), With<Player>>,
     time: Res<Time>,
@@ -114,20 +137,18 @@ fn throw_weapon(
             transform.translation += direction * DAGGER_SPAWN_DISTANCE;
             let rotation = Quat::from_axis_angle(Vec3::Z, (i as f32) * std::f32::consts::FRAC_PI_2);
             transform.rotate(rotation);
-            commands.spawn((
-                Dagger,
-                SpriteBundle {
-                    texture: sprite_assets.dagger.clone(),
+            commands.spawn(DaggerBundle {
+                spritesheet: SpriteSheetBundle {
+                    texture_atlas: sprite_assets.tiles.clone(),
+                    sprite: TextureAtlasSprite::new(103),
                     transform,
                     ..Default::default()
                 },
-                Collider::new(Vec2::new(8., 13.)),
-                Health::new(DAGGER_HEALTH),
-                CollisionDamage::new(DAGGER_DAMAGE),
-                MovementBundle {
+                movement: MovementBundle {
                     velocity: Velocity::from_direction_speed(direction, DAGGER_SPEED),
                 },
-            ));
+                ..Default::default()
+            });
         }
     }
 }
