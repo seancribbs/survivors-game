@@ -5,7 +5,7 @@ mod asset_loader;
 mod camera;
 mod collision;
 mod combat;
-mod ghost;
+mod enemies;
 mod health;
 mod levels;
 mod movement;
@@ -33,7 +33,7 @@ fn main() {
         .add_plugins(asset_loader::AssetLoaderPlugin)
         .add_plugins(levels::LevelsPlugin)
         .add_plugins(movement::MovementPlugin)
-        .add_plugins(ghost::GhostPlugin)
+        .add_plugins(enemies::EnemiesPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(collision::CollisionPlugin)
         .add_plugins(health::HealthPlugin)

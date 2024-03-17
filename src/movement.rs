@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
 
 use crate::{
     collision::{Collider, CollisionEvent},
-    ghost::Ghost,
+    enemies::Enemy,
     levels::Wall,
     player::Player,
     schedule::InGame,
@@ -22,6 +23,11 @@ impl Velocity {
         }
     }
 
+    pub fn change_direction(&mut self, direction: Vec3) {
+        let speed = self.value.length();
+        self.change_direction_speed(direction, speed);
+    }
+
     pub fn change_direction_speed(&mut self, direction: Vec3, speed: f32) {
         self.value = direction.normalize_or_zero() * speed;
     }
@@ -32,6 +38,18 @@ pub struct MovementBundle {
     pub velocity: Velocity,
 }
 
+impl From<&EntityInstance> for MovementBundle {
+    fn from(value: &EntityInstance) -> Self {
+        if let Ok(speed) = value.get_float_field("speed") {
+            Self {
+                velocity: Velocity::from_direction_speed(Vec3::X, *speed),
+            }
+        } else {
+            Default::default()
+        }
+    }
+}
+
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
@@ -39,7 +57,7 @@ impl Plugin for MovementPlugin {
             (
                 update_position,
                 keep_inside_walls::<Player>,
-                keep_inside_walls::<Ghost>,
+                keep_inside_walls::<Enemy>,
             )
                 .chain()
                 .in_set(InGame::EntityUpdates),

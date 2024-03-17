@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
+use bevy_ecs_ldtk::prelude::*;
 
 use crate::{
-    ghost::Ghost,
+    enemies::Enemy,
     player::{Dagger, Player},
     schedule::InGame,
 };
@@ -19,7 +20,7 @@ impl Plugin for CollisionPlugin {
                 Update,
                 (
                     handle_collisions::<Player>,
-                    handle_collisions::<Ghost>,
+                    handle_collisions::<Enemy>,
                     handle_collisions::<Dagger>,
                 )
                     .in_set(InGame::ProcessCombat),
@@ -41,9 +42,31 @@ impl Default for Collider {
     }
 }
 
-#[derive(Component, Debug)]
+impl From<&EntityInstance> for Collider {
+    fn from(value: &EntityInstance) -> Self {
+        let width = value.get_float_field("collider_width");
+        let height = value.get_float_field("collider_height");
+        if let (Ok(width), Ok(height)) = (width, height) {
+            Self::new(Vec2::new(*width, *height))
+        } else {
+            Default::default()
+        }
+    }
+}
+
+#[derive(Component, Debug, Default)]
 pub struct CollisionDamage {
     pub amount: u32,
+}
+
+impl From<&EntityInstance> for CollisionDamage {
+    fn from(value: &EntityInstance) -> Self {
+        if let Ok(v) = value.get_int_field("collision_damage") {
+            Self { amount: *v as u32 }
+        } else {
+            Default::default()
+        }
+    }
 }
 
 impl CollisionDamage {

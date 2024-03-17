@@ -2,7 +2,7 @@ use std::ops::AddAssign;
 
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::{collision::CollisionEvent, ghost::Ghost, player::Player, schedule::InGame};
+use crate::{collision::CollisionEvent, enemies::Enemy, player::Player, schedule::InGame};
 
 pub struct CombatPlugin;
 
@@ -11,7 +11,7 @@ impl Plugin for CombatPlugin {
         app.add_systems(Update, apply_knockback.in_set(InGame::EntityUpdates))
             .add_systems(
                 Update,
-                knockback_collisions::<Player, Ghost>.in_set(InGame::ProcessCombat),
+                knockback_collisions::<Player, Enemy>.in_set(InGame::ProcessCombat),
             );
     }
 }

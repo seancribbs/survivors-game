@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
 
 use crate::{
     collision::{CollisionDamage, CollisionEvent},
-    ghost::Ghost,
+    enemies::Enemy,
     player::{Dagger, Player},
     schedule::InGame,
 };
@@ -14,8 +15,8 @@ impl Plugin for HealthPlugin {
         app.add_systems(
             Update,
             (
-                take_damage::<Player, Ghost>,
-                take_damage::<Ghost, Dagger>,
+                take_damage::<Player, Enemy>,
+                take_damage::<Enemy, Dagger>,
                 despawn_dead_entities,
             )
                 .chain()
@@ -25,10 +26,23 @@ impl Plugin for HealthPlugin {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Default)]
 pub struct Health {
     pub amount: u32,
     pub cooldown: Option<f32>,
+}
+
+impl From<&EntityInstance> for Health {
+    fn from(value: &EntityInstance) -> Self {
+        if let Ok(v) = value.get_int_field("health") {
+            Self {
+                amount: *v as u32,
+                ..Default::default()
+            }
+        } else {
+            Default::default()
+        }
+    }
 }
 
 #[derive(Component, Debug)]

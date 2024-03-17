@@ -1,1 +1,2 @@
-*
+* Generalize the weapons
+* UI things - health bars, damage given/taken

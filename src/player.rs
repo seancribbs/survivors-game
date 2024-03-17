@@ -5,7 +5,7 @@ use crate::{
     movement::{MovementBundle, Velocity},
     schedule::InGame,
 };
-use bevy::{prelude::*, sprite::Anchor};
+use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 const PLAYER_SPEED: f32 = 50.;
