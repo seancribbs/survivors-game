@@ -11,61 +11,8 @@ use crate::movement::{MovementBundle, Velocity};
 use crate::player::Player;
 use crate::schedule::InGame;
 
-// const GHOST_SPEED: f32 = 30.;
 const SPAWN_INTERVAL: f32 = 0.5;
-// const GHOST_SIZE: Vec2 = Vec2::splat(16.);
-// const GHOST_DAMAGE: u32 = 5;
-// const GHOST_HEALTH: u32 = 10;
-
-#[derive(Component, Debug, Default)]
-pub struct Ghost;
-
-#[derive(Bundle, LdtkEntity, Default)]
-pub struct GhostBundle {
-    kind: Ghost,
-    #[ldtk_entity]
-    enemy: EnemyBundle,
-}
-
-#[derive(Component, Debug, Default)]
-pub struct Cyclops;
-
-#[derive(Bundle, LdtkEntity, Default)]
-pub struct CyclopsBundle {
-    kind: Cyclops,
-    #[ldtk_entity]
-    enemy: EnemyBundle,
-}
-
-#[derive(Component, Debug, Default)]
-pub struct Crab;
-
-#[derive(Bundle, LdtkEntity, Default)]
-pub struct CrabBundle {
-    kind: Crab,
-    #[ldtk_entity]
-    enemy: EnemyBundle,
-}
-
-#[derive(Component, Debug, Default)]
-pub struct Bat;
-
-#[derive(Bundle, LdtkEntity, Default)]
-pub struct BatBundle {
-    kind: Bat,
-    #[ldtk_entity]
-    enemy: EnemyBundle,
-}
-
-#[derive(Component, Debug, Default)]
-pub struct Spider;
-
-#[derive(Bundle, LdtkEntity, Default)]
-pub struct SpiderBundle {
-    kind: Spider,
-    #[ldtk_entity]
-    enemy: EnemyBundle,
-}
+const ENEMY_ENTITIES: [&str; 5] = ["ghost", "cyclops", "crab", "bat", "spider"];
 
 #[derive(Component, Debug, Default)]
 pub struct Enemy;
@@ -98,14 +45,11 @@ impl Default for SpawnTimer {
 
 impl Plugin for EnemiesPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(SpawnTimer::default())
-            .register_ldtk_entity::<GhostBundle>("ghost")
-            // .add_systems(Update, spawn_ghost)
-            .register_ldtk_entity::<CyclopsBundle>("cyclops")
-            .register_ldtk_entity::<CrabBundle>("crab")
-            .register_ldtk_entity::<BatBundle>("bat")
-            .register_ldtk_entity::<SpiderBundle>("spider")
-            .add_systems(Update, chase_player.in_set(InGame::EntityUpdates));
+        let app = app.insert_resource(SpawnTimer::default());
+        for enemy in ENEMY_ENTITIES {
+            app.register_ldtk_entity::<EnemyBundle>(enemy);
+        }
+        app.add_systems(Update, chase_player.in_set(InGame::EntityUpdates));
     }
 }
 
