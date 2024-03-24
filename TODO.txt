@@ -1,2 +1,2 @@
-* UI things - health bars, damage given/taken
+* Split up damage event emission from processing
 * Generalize the weapons

@@ -2,6 +2,7 @@ use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::{
+    asset_loader::Fonts,
     collision::{CollisionDamage, CollisionEvent},
     enemies::Enemy,
     player::{Dagger, Player},
@@ -12,21 +13,29 @@ pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (
-                take_damage::<Player, Enemy>,
-                take_damage::<Enemy, Dagger>,
-                despawn_dead_entities,
+        app.add_event::<DamageEvent>()
+            .add_systems(
+                Update,
+                (
+                    take_damage::<Player, Enemy>,
+                    take_damage::<Enemy, Dagger>,
+                    take_damage::<Dagger, Enemy>,
+                    despawn_dead_entities,
+                )
+                    .chain()
+                    .in_set(InGame::ProcessCombat),
             )
-                .chain()
-                .in_set(InGame::ProcessCombat),
-        )
-        .add_systems(
-            Update,
-            (tick_damage_cooldown, create_health_bars, update_health_bars)
-                .in_set(InGame::EntityUpdates),
-        );
+            .add_systems(
+                Update,
+                (
+                    tick_damage_cooldown,
+                    create_health_bars,
+                    update_health_bars,
+                    display_damage,
+                    tick_damage_display,
+                )
+                    .in_set(InGame::EntityUpdates),
+            );
     }
 }
 
@@ -53,6 +62,48 @@ impl From<&EntityInstance> for Health {
             }
         } else {
             Default::default()
+        }
+    }
+}
+
+#[derive(Debug, Event)]
+pub struct DamageEvent {
+    pub amount: u32,
+    pub position: Vec3,
+    pub receiver: Entity,
+}
+
+#[derive(Component, Debug, Default)]
+pub struct DamageDisplay(Timer);
+
+#[derive(Bundle, Debug)]
+pub struct DamageDisplayBundle {
+    pub timer: DamageDisplay,
+    pub text: Text2dBundle,
+}
+
+impl DamageDisplayBundle {
+    fn new(position: Vec3, amount: u32, fonts: &Res<Fonts>) -> Self {
+        let mut transform = Transform::from_translation(position);
+        transform.translation.z = 1000.;
+        let timer = DamageDisplay(Timer::from_seconds(0.25, TimerMode::Once));
+        Self {
+            timer,
+            text: Text2dBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: format!("{amount}"),
+                        style: TextStyle {
+                            font: fonts.arcade.clone(),
+                            font_size: 8.,
+                            color: Color::ORANGE_RED,
+                        },
+                    }],
+                    ..Default::default()
+                },
+                transform,
+                ..Default::default()
+            },
         }
     }
 }
@@ -90,17 +141,24 @@ impl Health {
 fn take_damage<T: Component, E: Component>(
     mut commands: Commands,
     mut events: EventReader<CollisionEvent>,
-    mut receiver: Query<&mut Health, (With<T>, Without<DamageCooldown>)>,
+    mut damage_events: EventWriter<DamageEvent>,
+    mut receiver: Query<(&mut Health, &Transform), (With<T>, Without<DamageCooldown>)>,
     damager: Query<&CollisionDamage, With<E>>,
 ) {
     for collision in events.read() {
-        let Ok(mut health) = receiver.get_mut(collision.entity) else {
+        let Ok((mut health, transform)) = receiver.get_mut(collision.entity) else {
             continue;
         };
 
         let Ok(damage) = damager.get(collision.collided_with) else {
             continue;
         };
+
+        damage_events.send(DamageEvent {
+            amount: damage.amount,
+            position: transform.translation,
+            receiver: collision.entity,
+        });
 
         health.amount = health.amount.saturating_sub(damage.amount);
 
@@ -183,5 +241,34 @@ fn update_health_bars(
         // Shift the bar's center leftwards as it shrinks
         transform.translation.x = (1.0 - percent) * -6.;
         transform.scale.x = percent;
+    }
+}
+
+fn display_damage(mut commands: Commands, mut events: EventReader<DamageEvent>, fonts: Res<Fonts>) {
+    for DamageEvent {
+        amount,
+        position,
+        receiver: _,
+    } in events.read()
+    {
+        commands.spawn(DamageDisplayBundle::new(*position, *amount, &fonts));
+    }
+}
+
+fn tick_damage_display(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut DamageDisplay, &mut Text)>,
+    time: Res<Time>,
+) {
+    for (entity, mut display, mut text) in query.iter_mut() {
+        display.0.tick(time.delta());
+        if display.0.just_finished() {
+            commands.entity(entity).despawn_recursive();
+        } else {
+            text.sections[0]
+                .style
+                .color
+                .set_a(1.0 - display.0.percent().powf(1.5));
+        }
     }
 }
