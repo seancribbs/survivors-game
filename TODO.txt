@@ -1,3 +1,2 @@
-* Cleanup enemy entity definitions
 * UI things - health bars, damage given/taken
 * Generalize the weapons

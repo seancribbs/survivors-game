@@ -1,7 +1,7 @@
 use crate::{
     asset_loader::SpriteAssets,
     collision::{Collider, CollisionDamage},
-    health::Health,
+    health::{Health, HealthBar},
     movement::{MovementBundle, Velocity},
     schedule::InGame,
 };
@@ -46,6 +46,7 @@ pub struct PlayerBundle {
     collider: Collider,
     weapon: Weapon,
     movement: MovementBundle,
+    health_bar: HealthBar,
 }
 
 impl Default for PlayerBundle {
@@ -60,6 +61,7 @@ impl Default for PlayerBundle {
                 TimerMode::Repeating,
             )),
             movement: Default::default(),
+            health_bar: HealthBar,
         }
     }
 }
