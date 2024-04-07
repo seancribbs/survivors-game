@@ -1,2 +1,1 @@
-* Generalize the weapons
-* Spawn behavior
+* Spawn behavior - specify enemies to be spawned as data, but not in the LDTK entities layer
