@@ -7,16 +7,13 @@ use crate::{
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use rand::random;
 
 const PLAYER_SPEED: f32 = 50.;
 const PLAYER_SIZE: Vec2 = Vec2::splat(16.);
 const PLAYER_STARTING_HEALTH: u32 = 30;
 const PLAYER_ATTACK_COOLDOWN: f32 = 1.0;
 const PLAYER_DAMAGE_COOLDOWN: f32 = 0.25;
-const DAGGER_SPEED: f32 = 100.0;
-const DAGGER_SPAWN_DISTANCE: f32 = 16.0;
-const DAGGER_DAMAGE: u32 = 5;
-const DAGGER_HEALTH: u32 = 1;
 
 pub struct PlayerPlugin;
 
@@ -31,11 +28,53 @@ impl Plugin for PlayerPlugin {
 #[derive(Component, Debug, Default)]
 pub struct Player;
 
-#[derive(Component, Debug)]
-pub struct Weapon(Timer);
+#[derive(Debug, Default, Clone, Copy)]
+pub enum WeaponType {
+    #[default]
+    Dagger,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+pub enum WeaponSpawnBehavior {
+    #[default]
+    FourDirections,
+    Facing,
+    Random,
+}
+
+#[derive(Debug, Clone)]
+pub struct WeaponSpec {
+    speed: f32,
+    distance: f32,
+    damage: u32,
+    health: u32,
+    behavior: WeaponSpawnBehavior,
+    collider: Collider,
+}
+
+impl From<WeaponType> for WeaponSpec {
+    fn from(value: WeaponType) -> Self {
+        match value {
+            WeaponType::Dagger => Self {
+                speed: 100.0,
+                distance: 16.0,
+                damage: 5,
+                health: 1,
+                collider: Collider::new(Vec2::new(8., 13.)),
+                behavior: WeaponSpawnBehavior::FourDirections,
+            },
+        }
+    }
+}
 
 #[derive(Component, Debug)]
-pub struct Dagger;
+pub struct Weapon {
+    kind: WeaponType,
+    cooldown: Timer,
+}
+
+#[derive(Component, Debug)]
+pub struct Projectile;
 
 #[derive(Bundle, LdtkEntity)]
 pub struct PlayerBundle {
@@ -56,10 +95,10 @@ impl Default for PlayerBundle {
             sprite_sheet_bundle: Default::default(),
             health: Health::with_damage_cooldown(PLAYER_STARTING_HEALTH, PLAYER_DAMAGE_COOLDOWN),
             collider: Collider::new(PLAYER_SIZE),
-            weapon: Weapon(Timer::from_seconds(
-                PLAYER_ATTACK_COOLDOWN,
-                TimerMode::Repeating,
-            )),
+            weapon: Weapon {
+                kind: Default::default(),
+                cooldown: Timer::from_seconds(PLAYER_ATTACK_COOLDOWN, TimerMode::Repeating),
+            },
             movement: Default::default(),
             health_bar: HealthBar,
         }
@@ -98,26 +137,13 @@ fn player_movement(
 }
 
 #[derive(Bundle)]
-pub struct DaggerBundle {
-    dagger: Dagger,
+pub struct WeaponBundle {
+    projectile: Projectile,
     spritesheet: SpriteSheetBundle,
     collider: Collider,
     health: Health,
     collision_damage: CollisionDamage,
     movement: MovementBundle,
-}
-
-impl Default for DaggerBundle {
-    fn default() -> Self {
-        Self {
-            dagger: Dagger,
-            spritesheet: Default::default(),
-            collider: Collider::new(Vec2::new(8., 13.)),
-            health: Health::new(DAGGER_HEALTH),
-            collision_damage: CollisionDamage::new(DAGGER_DAMAGE),
-            movement: Default::default(),
-        }
-    }
 }
 
 fn throw_weapon(
@@ -129,27 +155,56 @@ fn throw_weapon(
     let Ok((mut weapon, player_transform)) = query.get_single_mut() else {
         return;
     };
-    weapon.0.tick(time.delta());
-    if weapon.0.just_finished() {
-        for (i, direction) in [Vec3::Y, Vec3::NEG_X, Vec3::NEG_Y, Vec3::X]
-            .into_iter()
-            .enumerate()
-        {
-            let mut transform = *player_transform;
-            transform.translation += direction * DAGGER_SPAWN_DISTANCE;
-            let rotation = Quat::from_axis_angle(Vec3::Z, (i as f32) * std::f32::consts::FRAC_PI_2);
-            transform.rotate(rotation);
-            commands.spawn(DaggerBundle {
+    weapon.cooldown.tick(time.delta());
+    if weapon.cooldown.just_finished() {
+        let spec: WeaponSpec = weapon.kind.into();
+
+        let spawns: Vec<(Transform, Velocity)> = match &spec.behavior {
+            WeaponSpawnBehavior::FourDirections => [Vec3::Y, Vec3::NEG_X, Vec3::NEG_Y, Vec3::X]
+                .into_iter()
+                .enumerate()
+                .map(|(i, direction)| {
+                    let mut transform = *player_transform;
+                    transform.translation += direction * spec.distance;
+                    let rotation =
+                        Quat::from_axis_angle(Vec3::Z, (i as f32) * std::f32::consts::FRAC_PI_2);
+                    transform.rotate(rotation);
+                    let velocity = Velocity::from_direction_speed(direction, spec.speed);
+                    (transform, velocity)
+                })
+                .collect(),
+            WeaponSpawnBehavior::Facing => todo!(),
+            WeaponSpawnBehavior::Random => {
+                let mut transform = *player_transform;
+                let angle = random::<f32>() * std::f32::consts::TAU;
+                let rotation = Quat::from_axis_angle(Vec3::Z, angle);
+                let direction = Vec2::from_angle(angle).extend(0.);
+                transform.translation += direction * spec.distance;
+                transform.rotate(rotation);
+                vec![(
+                    transform,
+                    Velocity::from_direction_speed(direction, spec.speed),
+                )]
+            }
+        };
+
+        let sprite = match weapon.kind {
+            WeaponType::Dagger => TextureAtlasSprite::new(103),
+        };
+
+        for (transform, velocity) in spawns {
+            commands.spawn(WeaponBundle {
                 spritesheet: SpriteSheetBundle {
                     texture_atlas: sprite_assets.tiles.clone(),
-                    sprite: TextureAtlasSprite::new(103),
+                    sprite: sprite.clone(),
                     transform,
                     ..Default::default()
                 },
-                movement: MovementBundle {
-                    velocity: Velocity::from_direction_speed(direction, DAGGER_SPEED),
-                },
-                ..Default::default()
+                movement: MovementBundle { velocity },
+                projectile: Projectile,
+                collider: spec.collider.clone(),
+                health: Health::new(spec.health),
+                collision_damage: CollisionDamage::new(spec.damage),
             });
         }
     }

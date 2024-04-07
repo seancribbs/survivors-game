@@ -6,7 +6,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 use crate::{
     enemies::Enemy,
-    player::{Dagger, Player},
+    player::{Player, Projectile},
     schedule::InGame,
 };
 
@@ -21,7 +21,7 @@ impl Plugin for CollisionPlugin {
                 (
                     handle_collisions::<Player>,
                     handle_collisions::<Enemy>,
-                    handle_collisions::<Dagger>,
+                    handle_collisions::<Projectile>,
                 )
                     .in_set(InGame::ProcessCombat),
             )
@@ -29,7 +29,7 @@ impl Plugin for CollisionPlugin {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Clone)]
 pub struct Collider {
     pub size: Vec2,
     pub offset: Vec2,

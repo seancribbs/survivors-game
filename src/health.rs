@@ -5,7 +5,7 @@ use crate::{
     asset_loader::Fonts,
     collision::{CollisionDamage, CollisionEvent},
     enemies::Enemy,
-    player::{Dagger, Player},
+    player::{Player, Projectile},
     schedule::InGame,
 };
 
@@ -18,8 +18,8 @@ impl Plugin for HealthPlugin {
                 Update,
                 (
                     take_damage::<Player, Enemy>,
-                    take_damage::<Enemy, Dagger>,
-                    take_damage::<Dagger, Enemy>,
+                    take_damage::<Enemy, Projectile>,
+                    take_damage::<Projectile, Enemy>,
                     despawn_dead_entities,
                 )
                     .chain()
