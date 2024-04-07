@@ -7,7 +7,7 @@ use bevy_ecs_ldtk::prelude::*;
 use crate::collision::{Collider, CollisionDamage};
 use crate::health::Health;
 // use crate::levels::SpawnLocations;
-use crate::movement::{MovementBundle, Velocity};
+use crate::movement::{Facing, MovementBundle, Velocity};
 use crate::player::Player;
 use crate::schedule::InGame;
 
@@ -128,14 +128,15 @@ impl Plugin for EnemiesPlugin {
 // }
 
 fn chase_player(
-    mut enemies: Query<(&mut Velocity, &Transform), With<Enemy>>,
+    mut enemies: Query<(&mut Velocity, &Transform, &mut Facing), With<Enemy>>,
     player: Query<&Transform, With<Player>>,
 ) {
     let Ok(player_transform) = player.get_single() else {
         return;
     };
-    for (mut velocity, transform) in enemies.iter_mut() {
+    for (mut velocity, transform, mut facing) in enemies.iter_mut() {
         let direction = player_transform.translation - transform.translation;
+        facing.value = direction.normalize_or_zero();
         velocity.change_direction(direction);
     }
 }

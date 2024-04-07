@@ -63,6 +63,7 @@ impl Plugin for MovementPlugin {
             Update,
             (
                 update_position,
+                update_sprite_direction,
                 keep_inside_walls::<Player>,
                 keep_inside_walls::<Enemy>,
             )
@@ -75,6 +76,12 @@ impl Plugin for MovementPlugin {
 fn update_position(mut query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
     for (velocity, mut transform) in query.iter_mut() {
         transform.translation += velocity.value * time.delta_seconds();
+    }
+}
+
+fn update_sprite_direction(mut query: Query<(&Facing, &mut TextureAtlasSprite)>) {
+    for (facing, mut sprite) in query.iter_mut() {
+        sprite.flip_x = facing.value.x.signum() < 0.;
     }
 }
 
