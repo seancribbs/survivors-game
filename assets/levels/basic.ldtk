@@ -1703,7 +1703,7 @@
 						},
 						{
 							"__identifier": "cyclops",
-							"__grid": [45,32],
+							"__grid": [45,26],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 16, "y": 144, "w": 16, "h": 16 },
@@ -1712,7 +1712,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 38,
-							"px": [728,520],
+							"px": [728,424],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 20, "__tile": null, "defUid": 39, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 15, "__tile": null, "defUid": 40, "realEditorValues": [] },
@@ -1721,11 +1721,11 @@
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 43, "realEditorValues": [] }
 							],
 							"__worldX": 728,
-							"__worldY": -680
+							"__worldY": -776
 						},
 						{
 							"__identifier": "crab",
-							"__grid": [51,26],
+							"__grid": [51,20],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 32, "y": 144, "w": 16, "h": 16 },
@@ -1734,7 +1734,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 44,
-							"px": [824,424],
+							"px": [824,328],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 12, "__tile": null, "defUid": 45, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 15, "__tile": null, "defUid": 46, "realEditorValues": [] },
@@ -1743,11 +1743,11 @@
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
 							"__worldX": 824,
-							"__worldY": -776
+							"__worldY": -872
 						},
 						{
 							"__identifier": "bat",
-							"__grid": [58,36],
+							"__grid": [62,40],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 0, "y": 160, "w": 16, "h": 16 },
@@ -1756,7 +1756,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 50,
-							"px": [936,584],
+							"px": [1000,648],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 10, "__tile": null, "defUid": 51, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 30, "__tile": null, "defUid": 52, "realEditorValues": [] },
@@ -1764,8 +1764,8 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 54, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 55, "realEditorValues": [] }
 							],
-							"__worldX": 936,
-							"__worldY": -616
+							"__worldX": 1000,
+							"__worldY": -552
 						},
 						{
 							"__identifier": "bat",
@@ -1879,7 +1879,7 @@
 						},
 						{
 							"__identifier": "spider",
-							"__grid": [50,40],
+							"__grid": [49,45],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 32, "y": 160, "w": 16, "h": 16 },
@@ -1888,7 +1888,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 56,
-							"px": [808,648],
+							"px": [792,728],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 20, "__tile": null, "defUid": 57, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 30, "__tile": null, "defUid": 58, "realEditorValues": [] },
@@ -1896,8 +1896,8 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 60, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 61, "realEditorValues": [] }
 							],
-							"__worldX": 808,
-							"__worldY": -552
+							"__worldX": 792,
+							"__worldY": -472
 						},
 						{
 							"__identifier": "spider",
@@ -1923,7 +1923,7 @@
 						},
 						{
 							"__identifier": "ghost",
-							"__grid": [50,29],
+							"__grid": [49,24],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 16, "y": 160, "w": 16, "h": 16 },
@@ -1932,7 +1932,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 30,
-							"px": [808,472],
+							"px": [792,392],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 10, "__tile": null, "defUid": 33, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 30, "__tile": null, "defUid": 31, "realEditorValues": [] },
@@ -1940,12 +1940,12 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 36, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 37, "realEditorValues": [] }
 							],
-							"__worldX": 808,
-							"__worldY": -728
+							"__worldX": 792,
+							"__worldY": -808
 						},
 						{
 							"__identifier": "ghost",
-							"__grid": [54,32],
+							"__grid": [64,36],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 16, "y": 160, "w": 16, "h": 16 },
@@ -1954,7 +1954,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 30,
-							"px": [872,520],
+							"px": [1032,584],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 10, "__tile": null, "defUid": 33, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 30, "__tile": null, "defUid": 31, "realEditorValues": [] },
@@ -1962,12 +1962,12 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 36, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 37, "realEditorValues": [] }
 							],
-							"__worldX": 872,
-							"__worldY": -680
+							"__worldX": 1032,
+							"__worldY": -616
 						},
 						{
 							"__identifier": "ghost",
-							"__grid": [54,37],
+							"__grid": [58,42],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 16, "y": 160, "w": 16, "h": 16 },
@@ -1976,7 +1976,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 30,
-							"px": [872,600],
+							"px": [936,680],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 10, "__tile": null, "defUid": 33, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 30, "__tile": null, "defUid": 31, "realEditorValues": [] },
@@ -1984,12 +1984,12 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 36, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 37, "realEditorValues": [] }
 							],
-							"__worldX": 872,
-							"__worldY": -600
+							"__worldX": 936,
+							"__worldY": -520
 						},
 						{
 							"__identifier": "ghost",
-							"__grid": [45,37],
+							"__grid": [41,44],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 16, "y": 160, "w": 16, "h": 16 },
@@ -1998,7 +1998,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 30,
-							"px": [728,600],
+							"px": [664,712],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 10, "__tile": null, "defUid": 33, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 30, "__tile": null, "defUid": 31, "realEditorValues": [] },
@@ -2006,8 +2006,8 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 36, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 37, "realEditorValues": [] }
 							],
-							"__worldX": 728,
-							"__worldY": -600
+							"__worldX": 664,
+							"__worldY": -488
 						},
 						{
 							"__identifier": "ghost",
@@ -2847,7 +2847,7 @@
 						},
 						{
 							"__identifier": "crab",
-							"__grid": [42,30],
+							"__grid": [39,28],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 32, "y": 144, "w": 16, "h": 16 },
@@ -2856,7 +2856,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 44,
-							"px": [680,488],
+							"px": [632,456],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 12, "__tile": null, "defUid": 45, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 15, "__tile": null, "defUid": 46, "realEditorValues": [] },
@@ -2864,8 +2864,8 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
-							"__worldX": 680,
-							"__worldY": -712
+							"__worldX": 632,
+							"__worldY": -744
 						},
 						{
 							"__identifier": "crab",
@@ -2913,7 +2913,7 @@
 						},
 						{
 							"__identifier": "crab",
-							"__grid": [42,37],
+							"__grid": [34,41],
 							"__pivot": [0.5,0.5],
 							"__tags": ["enemy"],
 							"__tile": { "tilesetUid": 4, "x": 32, "y": 144, "w": 16, "h": 16 },
@@ -2922,7 +2922,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 44,
-							"px": [680,600],
+							"px": [552,664],
 							"fieldInstances": [
 								{ "__identifier": "health", "__type": "Int", "__value": 12, "__tile": null, "defUid": 45, "realEditorValues": [] },
 								{ "__identifier": "speed", "__type": "Float", "__value": 15, "__tile": null, "defUid": 46, "realEditorValues": [] },
@@ -2930,8 +2930,30 @@
 								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
-							"__worldX": 680,
-							"__worldY": -600
+							"__worldX": 552,
+							"__worldY": -536
+						},
+						{
+							"__identifier": "crab",
+							"__grid": [52,25],
+							"__pivot": [0.5,0.5],
+							"__tags": ["enemy"],
+							"__tile": { "tilesetUid": 4, "x": 32, "y": 144, "w": 16, "h": 16 },
+							"__smartColor": "#D77643",
+							"iid": "d8bb9a00-d7b0-11ee-b425-458a718c64e9",
+							"width": 16,
+							"height": 16,
+							"defUid": 44,
+							"px": [840,408],
+							"fieldInstances": [
+								{ "__identifier": "health", "__type": "Int", "__value": 12, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "speed", "__type": "Float", "__value": 15, "__tile": null, "defUid": 46, "realEditorValues": [] },
+								{ "__identifier": "collision_damage", "__type": "Int", "__value": 5, "__tile": null, "defUid": 47, "realEditorValues": [] },
+								{ "__identifier": "collider_width", "__type": "Float", "__value": 16, "__tile": null, "defUid": 48, "realEditorValues": [] },
+								{ "__identifier": "collider_height", "__type": "Float", "__value": 16, "__tile": null, "defUid": 49, "realEditorValues": [] }
+							],
+							"__worldX": 840,
+							"__worldY": -792
 						}
 					]
 				},

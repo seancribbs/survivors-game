@@ -13,7 +13,12 @@ pub struct MovementPlugin;
 
 #[derive(Component, Debug, Default)]
 pub struct Velocity {
-    value: Vec3,
+    pub value: Vec3,
+}
+
+#[derive(Component, Debug, Default)]
+pub struct Facing {
+    pub value: Vec3,
 }
 
 impl Velocity {
@@ -36,6 +41,7 @@ impl Velocity {
 #[derive(Bundle, Debug, Default)]
 pub struct MovementBundle {
     pub velocity: Velocity,
+    pub facing: Facing,
 }
 
 impl From<&EntityInstance> for MovementBundle {
@@ -43,6 +49,7 @@ impl From<&EntityInstance> for MovementBundle {
         if let Ok(speed) = value.get_float_field("speed") {
             Self {
                 velocity: Velocity::from_direction_speed(Vec3::X, *speed),
+                ..Default::default()
             }
         } else {
             Default::default()

@@ -2,7 +2,7 @@ use crate::{
     asset_loader::SpriteAssets,
     collision::{Collider, CollisionDamage},
     health::{Health, HealthBar},
-    movement::{MovementBundle, Velocity},
+    movement::{Facing, MovementBundle, Velocity},
     schedule::InGame,
 };
 use bevy::prelude::*;
@@ -99,14 +99,17 @@ impl Default for PlayerBundle {
                 kind: Default::default(),
                 cooldown: Timer::from_seconds(PLAYER_ATTACK_COOLDOWN, TimerMode::Repeating),
             },
-            movement: Default::default(),
+            movement: MovementBundle {
+                facing: Facing { value: Vec3::X },
+                ..Default::default()
+            },
             health_bar: HealthBar,
         }
     }
 }
 
 fn player_movement(
-    mut query: Query<(&mut Velocity, &mut Transform), With<Player>>,
+    mut query: Query<(&mut Velocity, &mut Transform, &mut Facing), With<Player>>,
     input: Res<Input<KeyCode>>,
 ) {
     let mut direction = Vec3::ZERO;
@@ -129,9 +132,12 @@ fn player_movement(
     }
     // NOTE: If the player has died/been despawned from losing all its health, this will panic.
     // We need to solve this by changing game states or guarding this access.
-    let Ok((mut velocity, mut transform)) = query.get_single_mut() else {
+    let Ok((mut velocity, mut transform, mut facing)) = query.get_single_mut() else {
         return;
     };
+    if direction != Vec3::ZERO {
+        facing.value = direction;
+    }
     transform.translation.z = 100.0;
     velocity.change_direction_speed(direction, PLAYER_SPEED);
 }
@@ -147,12 +153,12 @@ pub struct WeaponBundle {
 }
 
 fn throw_weapon(
-    mut query: Query<(&mut Weapon, &Transform), With<Player>>,
+    mut query: Query<(&mut Weapon, &Transform, &Facing), With<Player>>,
     time: Res<Time>,
     mut commands: Commands,
     sprite_assets: Res<SpriteAssets>,
 ) {
-    let Ok((mut weapon, player_transform)) = query.get_single_mut() else {
+    let Ok((mut weapon, player_transform, facing)) = query.get_single_mut() else {
         return;
     };
     weapon.cooldown.tick(time.delta());
@@ -173,12 +179,36 @@ fn throw_weapon(
                     (transform, velocity)
                 })
                 .collect(),
-            WeaponSpawnBehavior::Facing => todo!(),
+            WeaponSpawnBehavior::Facing => {
+                let mut transform = *player_transform;
+                let direction = facing.value;
+                transform.translation += direction * spec.distance;
+                let rotation = Quat::from_axis_angle(
+                    Vec3::Z,
+                    if direction.y.signum() < 0. {
+                        Vec3::NEG_X.angle_between(direction) + std::f32::consts::FRAC_PI_2
+                    } else {
+                        Vec3::X.angle_between(direction) - std::f32::consts::FRAC_PI_2
+                    }, // TODO: What is the correct mathematical way to deal with this
+                );
+                transform.rotate(rotation);
+                vec![(
+                    transform,
+                    Velocity::from_direction_speed(direction, spec.speed),
+                )]
+            }
             WeaponSpawnBehavior::Random => {
                 let mut transform = *player_transform;
                 let angle = random::<f32>() * std::f32::consts::TAU;
-                let rotation = Quat::from_axis_angle(Vec3::Z, angle);
                 let direction = Vec2::from_angle(angle).extend(0.);
+                let rotation = Quat::from_axis_angle(
+                    Vec3::Z,
+                    if direction.y.signum() < 0. {
+                        Vec3::NEG_X.angle_between(direction) + std::f32::consts::FRAC_PI_2
+                    } else {
+                        Vec3::X.angle_between(direction) - std::f32::consts::FRAC_PI_2
+                    }, // TODO: What is the correct mathematical way to deal with this
+                );
                 transform.translation += direction * spec.distance;
                 transform.rotate(rotation);
                 vec![(
@@ -200,7 +230,10 @@ fn throw_weapon(
                     transform,
                     ..Default::default()
                 },
-                movement: MovementBundle { velocity },
+                movement: MovementBundle {
+                    velocity,
+                    ..Default::default()
+                },
                 projectile: Projectile,
                 collider: spec.collider.clone(),
                 health: Health::new(spec.health),
