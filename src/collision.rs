@@ -54,7 +54,7 @@ impl From<&EntityInstance> for Collider {
     }
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Debug, Clone, Default)]
 pub struct CollisionDamage {
     pub amount: u32,
 }

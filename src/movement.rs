@@ -11,12 +11,12 @@ use crate::{
 
 pub struct MovementPlugin;
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Debug, Clone, Default)]
 pub struct Velocity {
     pub value: Vec3,
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Debug, Clone, Default)]
 pub struct Facing {
     pub value: Vec3,
 }
@@ -38,7 +38,7 @@ impl Velocity {
     }
 }
 
-#[derive(Bundle, Debug, Default)]
+#[derive(Bundle, Debug, Clone, Default)]
 pub struct MovementBundle {
     pub velocity: Velocity,
     pub facing: Facing,

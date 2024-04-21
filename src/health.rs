@@ -39,7 +39,7 @@ impl Plugin for HealthPlugin {
     }
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Debug, Clone, Default)]
 pub struct Health {
     pub amount: u32,
     pub total: u32,
