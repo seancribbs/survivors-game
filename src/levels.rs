@@ -27,13 +27,36 @@ impl SpawnLocations {
     }
 }
 
+#[derive(Resource, Default, Debug)]
+pub struct ActiveSpawnList(Vec<(String, i32)>);
+
+impl ActiveSpawnList {
+    pub fn pop_spawn(&mut self) -> Option<&str> {
+        for (name, count) in self.0.iter_mut() {
+            if *count > 0 {
+                *count -= 1;
+                return Some(&*name);
+            }
+        }
+        None
+    }
+}
+
 impl Plugin for LevelsPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LevelSelection::index(0))
             .init_resource::<SpawnLocations>()
+            .init_resource::<ActiveSpawnList>()
             .register_ldtk_int_cell::<WallBundle>(1)
             .add_systems(Startup, load_levels)
-            .add_systems(Update, (add_wall_colliders, preload_spawn_spots));
+            .add_systems(
+                Update,
+                (
+                    add_wall_colliders,
+                    preload_spawn_spots,
+                    populate_active_spawns,
+                ),
+            );
     }
 }
 
@@ -73,6 +96,57 @@ fn preload_spawn_spots(
             )
         })
         .collect();
+}
+
+fn populate_active_spawns(
+    mut level_events: EventReader<LevelEvent>,
+    mut active_spawns: ResMut<ActiveSpawnList>,
+    ldtk_projects: Query<&Handle<LdtkProject>>,
+    ldtk_project_assets: Res<Assets<LdtkProject>>,
+) {
+    for level_event in level_events.read() {
+        if let LevelEvent::Spawned(level_iid) = level_event {
+            info!("Setting active spawn list for level {}", level_iid.as_str());
+            let ldtk_project = ldtk_project_assets
+                .get(ldtk_projects.single())
+                .expect("Project should be loaded if level has spawned");
+
+            let level = ldtk_project
+                .as_standalone()
+                .get_loaded_level_by_iid(&level_iid.as_str().to_owned())
+                .expect("Loaded level should exist");
+
+            let names: Vec<String> = level
+                .field_instances()
+                .iter()
+                .find_map(|fi| {
+                    if fi.identifier == "enemy_types" {
+                        if let FieldValue::Strings(strs) = &fi.value {
+                            return Some(strs.clone().into_iter().flatten().collect());
+                        }
+                    }
+                    None
+                })
+                .expect("Didn't find enemy_types field on level");
+            let counts: Vec<i32> = level
+                .field_instances()
+                .iter()
+                .find_map(|fi| {
+                    if fi.identifier == "enemy_counts" {
+                        if let FieldValue::Ints(ints) = &fi.value {
+                            return Some(ints.clone().into_iter().flatten().collect());
+                        }
+                    }
+                    None
+                })
+                .expect("Didn't find enemy_counts field on level");
+            info!(
+                "Got spawns {names:?} => {counts:?} for level {}",
+                level_iid.as_str()
+            );
+            active_spawns.0 = names.into_iter().zip(counts.into_iter()).collect();
+        }
+    }
 }
 
 fn add_wall_colliders(

@@ -9,7 +9,7 @@ use rand::Rng as _;
 // use crate::asset_loader::SpriteAssets;
 use crate::collision::{Collider, CollisionDamage};
 use crate::health::Health;
-use crate::levels::SpawnLocations;
+use crate::levels::{ActiveSpawnList, SpawnLocations};
 // use crate::levels::SpawnLocations;
 use crate::movement::{Facing, MovementBundle, Velocity};
 use crate::player::Player;
@@ -102,6 +102,7 @@ struct EnemyPrototypeQuery {
 fn spawn_enemy(
     mut commands: Commands,
     mut timer: ResMut<SpawnTimer>,
+    mut spawns: ResMut<ActiveSpawnList>,
     time: Res<Time>,
     prototypes: Query<EnemyPrototypeQuery>,
     level_selection: Res<LevelSelection>,
@@ -111,6 +112,9 @@ fn spawn_enemy(
     spawn_locations: Res<SpawnLocations>,
 ) {
     if timer.0.tick(time.delta()).just_finished() {
+        let Some(spawn_id) = spawns.pop_spawn() else {
+            return;
+        };
         let Some(spot) = pick_spawn_location(
             level_selection,
             ldtk_projects,
@@ -123,7 +127,7 @@ fn spawn_enemy(
         };
         let transform = Transform::from_translation(spot.extend(100.));
         for prototype in prototypes.iter() {
-            if prototype.prototype.0 == "ghost" {
+            if prototype.prototype.0 == spawn_id {
                 commands.spawn(EnemyBundle {
                     enemy: Enemy,
                     sprite: SpriteSheetBundle {
@@ -162,9 +166,7 @@ fn pick_spawn_location(
         .find_loaded_level_by_level_selection(&level_selection)
         .expect("Selected level should exist in LDTK project");
 
-    let Some(level_spawn_locations) = spawn_locations.for_level(level.iid()) else {
-        return None;
-    };
+    let level_spawn_locations = spawn_locations.for_level(level.iid())?;
 
     let LayerInstance {
         c_hei: height,
