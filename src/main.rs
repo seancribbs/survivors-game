@@ -8,6 +8,7 @@ mod combat;
 mod enemies;
 mod health;
 mod levels;
+mod menu;
 mod movement;
 mod player;
 mod schedule;
@@ -31,6 +32,7 @@ fn main() {
         .add_plugins(schedule::SchedulePlugin)
         .add_plugins(camera::CameraPlugin)
         .add_plugins(asset_loader::AssetLoaderPlugin)
+        .add_plugins(menu::MenuPlugin)
         .add_plugins(levels::LevelsPlugin)
         .add_plugins(movement::MovementPlugin)
         .add_plugins(enemies::EnemiesPlugin)

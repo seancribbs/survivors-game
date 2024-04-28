@@ -4,22 +4,25 @@ pub struct SchedulePlugin;
 
 impl Plugin for SchedulePlugin {
     fn build(&self, app: &mut App) {
-        app.configure_sets(
-            Update,
-            (
-                InGame::ProcessCombat,
-                InGame::UserInput,
-                InGame::EntityUpdates,
-                InGame::CollisionDetection,
+        app.add_state::<AppState>()
+            .configure_sets(
+                Update,
+                (
+                    InGame::ProcessCombat,
+                    InGame::UserInput,
+                    InGame::EntityUpdates,
+                    InGame::CollisionDetection,
+                )
+                    .chain()
+                    .run_if(in_state(AppState::InGame)),
             )
-                .chain(),
-        )
-        .add_systems(
-            Update,
-            apply_deferred
-                .before(InGame::UserInput)
-                .after(InGame::ProcessCombat),
-        );
+            .add_systems(
+                Update,
+                apply_deferred
+                    .before(InGame::UserInput)
+                    .after(InGame::ProcessCombat)
+                    .run_if(in_state(AppState::InGame)),
+            );
     }
 }
 
@@ -29,4 +32,12 @@ pub enum InGame {
     UserInput,
     EntityUpdates,
     CollisionDetection,
+}
+
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash, Default)]
+pub enum AppState {
+    #[default]
+    Menu,
+    InGame,
+    // LoadingScreen,
 }

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::collision::Collider;
+use crate::{collision::Collider, schedule::AppState};
 
 pub struct LevelsPlugin;
 
@@ -49,6 +49,8 @@ impl Plugin for LevelsPlugin {
             .init_resource::<ActiveSpawnList>()
             .register_ldtk_int_cell::<WallBundle>(1)
             .add_systems(Startup, load_levels)
+            .add_systems(OnEnter(AppState::InGame), show_level)
+            .add_systems(OnExit(AppState::InGame), hide_level)
             .add_systems(
                 Update,
                 (
@@ -60,9 +62,22 @@ impl Plugin for LevelsPlugin {
     }
 }
 
+fn show_level(mut query: Query<&mut Visibility, With<LevelSet>>) {
+    if let Ok(mut visibility) = query.get_single_mut() {
+        *visibility = Visibility::Visible;
+    }
+}
+
+fn hide_level(mut query: Query<&mut Visibility, With<LevelSet>>) {
+    if let Ok(mut visibility) = query.get_single_mut() {
+        *visibility = Visibility::Hidden;
+    }
+}
+
 fn load_levels(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: asset_server.load("levels/basic.ldtk"),
+        visibility: Visibility::Hidden,
         ..Default::default()
     });
 }

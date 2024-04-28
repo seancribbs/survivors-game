@@ -1,1 +1,1 @@
-
+* Restore camera limits when player reaches edge of screen

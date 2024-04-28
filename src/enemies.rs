@@ -113,6 +113,7 @@ fn spawn_enemy(
 ) {
     if timer.0.tick(time.delta()).just_finished() {
         let Some(spawn_id) = spawns.pop_spawn() else {
+            warn!("Couldn't find an enemy to spawn");
             return;
         };
         let Some(spot) = pick_spawn_location(

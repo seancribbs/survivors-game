@@ -8,6 +8,7 @@ pub struct SpriteAssets {
 #[derive(Resource, Debug, Default)]
 pub struct Fonts {
     pub arcade: Handle<Font>,
+    pub press_start: Handle<Font>,
 }
 
 pub struct AssetLoaderPlugin;
@@ -42,5 +43,6 @@ fn load_assets(
     };
     *font_assets = Fonts {
         arcade: asset_server.load("fonts/ArcadeClassic.ttf"),
+        press_start: asset_server.load("fonts/PressStart2P-Regular.ttf"),
     };
 }
