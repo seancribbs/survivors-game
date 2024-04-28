@@ -39,5 +39,5 @@ pub enum AppState {
     #[default]
     Menu,
     InGame,
-    // LoadingScreen,
+    GameOver,
 }

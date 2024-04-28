@@ -3,7 +3,7 @@ use crate::{
     collision::{Collider, CollisionDamage},
     health::{Health, HealthBar},
     movement::{Facing, MovementBundle, Velocity},
-    schedule::InGame,
+    schedule::{AppState, InGame},
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -21,7 +21,10 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.register_ldtk_entity::<PlayerBundle>("player")
             .add_systems(Update, throw_weapon.in_set(InGame::ProcessCombat))
-            .add_systems(Update, player_movement.in_set(InGame::UserInput));
+            .add_systems(Update, player_movement.in_set(InGame::UserInput))
+            .add_systems(Update, game_over.in_set(InGame::EntityUpdates))
+        // .add_systems(OnExit(AppState::InGame), reset_player)
+        ;
     }
 }
 
@@ -240,5 +243,11 @@ fn throw_weapon(
                 collision_damage: CollisionDamage::new(spec.damage),
             });
         }
+    }
+}
+
+fn game_over(mut next_state: ResMut<NextState<AppState>>, removed: RemovedComponents<Player>) {
+    if !removed.is_empty() {
+        next_state.set(AppState::GameOver);
     }
 }

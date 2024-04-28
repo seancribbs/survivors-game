@@ -1,1 +1,3 @@
+* Convert player spawn into prototype pattern like we did for enemies so
+  so that we can respawn the player when we enter the in-game state.
 * Restore camera limits when player reaches edge of screen
